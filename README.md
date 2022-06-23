@@ -38,6 +38,8 @@ https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legen
 
 https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html
 
+https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-LayerList.html
+
 ---
 
 ## Presentation
