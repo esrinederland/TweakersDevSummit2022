@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css" />
     <script src="https://js.arcgis.com/4.23/"></script>
     <script>
-        require(["esri/Map", "esri/views/MapView", "esri/layers/CSVLayer", "esri/layers/FeatureLayer"], (Map, MapView, CSVLayer, FeatureLayer) => {
+        require(["esri/Map", "esri/views/MapView", "esri/layers/CSVLayer", "esri/layers/FeatureLayer", "esri/widgets/LayerList"], (Map, MapView, CSVLayer, FeatureLayer, LayerList) => {
 
             let csvLayer = new CSVLayer({
                 url: "rijksmonumenten.csv",
@@ -203,6 +203,14 @@
                 url: "https://services.arcgis.com/emS4w7iyWEQiulAb/arcgis/rest/services/MeldkamersTest2/FeatureServer/0"
             });
             map.add(fl);  // adds the layer to the map
+
+            let layerList = new LayerList({
+                view: view
+            });
+            // Adds widget below other elements in the top left corner of the view
+            view.ui.add(layerList, {
+                position: "top-right"
+            });
         });
     </script>
 </head>
