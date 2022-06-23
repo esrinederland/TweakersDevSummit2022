@@ -1,0 +1,188 @@
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>Context2</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/dark/main.css">
+    <script src="https://js.arcgis.com/4.23/"></script>
+
+    <style>
+        html,
+        body,
+        #mapDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #header {
+            padding-left: 10px;
+            background-color: var(--calcite-ui-brand);
+            border-bottom: solid 1px var(--calcite-ui-brand-press);
+            color: var(--calcite-ui-foreground-3);
+        }
+
+        #footer {
+            padding: 10px 5px 10px 5px;
+            background-color: var(--calcite-ui-background);
+            border-top: solid 1px var(--calcite-ui-border-1);
+
+        }
+
+
+        /*Remove the black bar from the map*/
+        .mapDiv .esri-view-surface:focus::after {
+            outline: auto 0px !important;
+        }
+
+
+        .esri-logo {
+            margin: 0.375 rem;
+            content: "";
+            display: inline-block;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            min-height: 30px;
+            min-width: 70px;
+            line-height: 0;
+            background-size: 100% 100%;
+            background-image: url(../images/esri-logo.svg);
+        }
+
+        /*on a black theme change the logo*/
+        .calcite-theme-dark .esri-logo {
+            background-image: url(../images/esri-logo-reversed.svg);
+        }
+
+        calcite-button {
+
+            height: 44px;
+            margin-bottom: 2px;
+        }
+    </style>
+
+    <script>
+
+        var esriConfig = {
+            apiKey: "AAPK255c143116724ecba8b511d0b83ffb7cr2NF9ZluVk4-qgm03u5feBJYnMxVukwv1BFkDbweolBoWvpjKryZmpILSwDnlALF" //account: mvanhulzen_esrinl
+        }
+        var knrmUrl = "https://services.arcgis.com/nSZVuSZjHpEZZbRo/arcgis/rest/services/KNRM/FeatureServer/0";
+
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer"
+
+        ], (
+            Map,
+            MapView,
+            FeatureLayer
+        ) => {
+            let _fireGraphic = null;
+
+            const facilitiesLayer = new FeatureLayer({
+                url: knrmUrl,
+                minScale: 0
+
+            });
+
+            const map = new Map({
+                basemap: "arcgis-nova",
+                layers: [facilitiesLayer]
+            });
+            var view = new MapView({
+                map: map,
+                container: "mapDiv",
+                center: [5.9, 52.3],
+                zoom: 8
+            });
+
+
+
+            view.when(() => {
+                //ResetMap();
+            });
+
+            view.ui.add(document.getElementById("info-panel"), "top-right");
+
+            document.getElementById("reset-button").addEventListener("click", () => { ResetMap() });
+            document.getElementById("context-button").addEventListener("click", () => { AddContext() });
+
+            function ResetMap() {
+                console.log("Resetting map");
+
+                document.getElementById("header-title").innerHTML = "&nbsp;";
+                var newRenderer = {
+                    type: "simple",  // autocasts as new SimpleRenderer()
+                    symbol: {
+                        type:"simple-marker",
+                        size: "18px",
+                        color: "rgba(255,130,0,1)",
+
+                    }
+                }
+                facilitiesLayer.renderer = newRenderer;
+            }
+
+            function AddContext() {
+
+                // view.map.basemap.baseLayers.forEach(function (layer) {
+                //     layer.visible = true;
+                // });
+                document.getElementById("header-title").innerHTML = "KNRM reddingspost locaties";
+                var newRenderer = {
+                    type: "simple",  // autocasts as new SimpleRenderer()
+                    symbol: {
+                        type: "picture-marker",  // autocasts as new PictureMarkerSymbol()
+                        url: "icon.png",
+                        width: "32px",
+                        height: "32px"
+                    }
+                };
+                facilitiesLayer.renderer = newRenderer;
+
+
+            }
+
+        });
+    </script>
+</head>
+
+</html>
+
+<body class="calcite-theme-dark" >
+
+    <!-- shell will provide main app layout -->
+    <calcite-shell content-behind>
+        <!-- custom header for the shell -->
+        <div slot="header" id="header">
+            <h2 id="header-title">&nbsp;</h2>
+        </div>
+
+        <div id="mapDiv" class="mapdiv"></div>
+
+        <calcite-panel height-scale="l" width-scale="m" data-panel-id="info" id="info-panel" heading="">
+            <div id="info-container" class="info-container" style="padding: 1rem;">
+                <div id="button-container">
+                    <calcite-button id="context-button" scale="l" width="half">Context</calcite-button>
+                    <calcite-button color="neutral" id="reset-button" scale="l" width="half">Reset</calcite-button>
+                </div>
+            </div>
+        </calcite-panel>
+
+
+        <!-- custom footer for the shell -->
+        <div slot="footer" id="footer">
+            <div class="esri-logo"></div>
+        </div>
+    </calcite-shell>
+
+</body>
+<script src="https://esrinederland.github.io/CoolMonitor/CoolMonitor.js"></script>
+
+</html>

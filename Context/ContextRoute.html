@@ -1,0 +1,274 @@
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <title>Context</title>
+
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.0.0-beta.83/calcite.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.23/"></script>
+
+    <style>
+        html,
+        body,
+        #mapDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #header {
+            padding-left: 10px;
+            background-color: var(--calcite-ui-brand);
+            border-bottom: solid 1px var(--calcite-ui-brand-press);
+            color: var(--calcite-ui-foreground-3);
+        }
+
+        #footer {
+            padding: 10px 5px 10px 5px;
+            background-color: var(--calcite-ui-background);
+            border-top: solid 1px var(--calcite-ui-border-1);
+
+        }
+
+
+        /*Remove the black bar from the map*/
+        .mapDiv .esri-view-surface:focus::after {
+            outline: auto 0px !important;
+        }
+
+
+        .esri-logo {
+            margin: 0.375 rem;
+            content: "";
+            display: inline-block;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: transparent;
+            min-height: 30px;
+            min-width: 70px;
+            line-height: 0;
+            background-size: 100% 100%;
+            background-image: url(../images/esri-logo.svg);
+        }
+
+        /*on a black theme change the logo*/
+        .calcite-theme-dark .esri-logo {
+            background-image: url(../images/esri-logo-reversed.svg);
+        }
+
+        calcite-button {
+
+            height: 44px;
+            margin-bottom: 2px;
+        }
+    </style>
+
+    <script>
+
+        var esriConfig = {
+            apiKey: "AAPK255c143116724ecba8b511d0b83ffb7cr2NF9ZluVk4-qgm03u5feBJYnMxVukwv1BFkDbweolBoWvpjKryZmpILSwDnlALF" //account: mvanhulzen_esrinl
+        }
+        var facilitiesUrl = "https://services.arcgis.com/nSZVuSZjHpEZZbRo/ArcGIS/rest/services/Brandweerkazernes/FeatureServer/0";
+
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/layers/GraphicsLayer",
+            "esri/Graphic",
+            "esri/rest/closestFacility",
+            "esri/rest/support/ClosestFacilityParameters",
+            "esri/rest/support/NetworkUrl",
+            "esri/rest/support/FeatureSet"
+
+        ], (
+            Map,
+            MapView,
+            FeatureLayer,
+            GraphicsLayer,
+            Graphic,
+            closestFacility,
+            ClosestFacilityParameters,
+            NetworkUrl,
+            FeatureSet
+        ) => {
+            let _fireGraphic = null;
+
+            const facilitiesLayer = new FeatureLayer({
+                url: facilitiesUrl,
+                minScale: 0,
+                renderer: {
+                    type: "simple",
+                    symbol: {
+                        type: "simple-marker",
+                        size: "18px",
+                        color: "red",
+                        outline: {
+                            color: "white",
+                            width: "2px"
+                        }
+                    }
+                }
+            });
+
+            const map = new Map({
+                basemap: "arcgis-topographic",
+                layers: [facilitiesLayer]
+            });
+            var view = new MapView({
+                map: map,
+                container: "mapDiv"
+            });
+
+
+
+            view.when(() => {
+                ResetMap();
+            });
+
+            view.ui.add(document.getElementById("info-panel"), "top-right");
+
+            document.getElementById("reset-button").addEventListener("click", () => { ResetMap() });
+            document.getElementById("add-fire-button").addEventListener("click", () => { AddFire() });
+            document.getElementById("calculate-closest-button").addEventListener("click", () => { CalculateClosest() });
+            document.getElementById("context-button").addEventListener("click", () => { AddContext() });
+
+            function ResetMap() {
+                console.log("Resetting map");
+
+                view.center = {
+                    x: 680260.8878522748,
+                    y: 6883871.889964882,
+                    spatialReference: {
+                        wkid: 102100
+                    }
+                }
+                view.zoom = 13;
+                view.map.basemap.baseLayers.forEach(function (layer) {
+                    layer.visible = false;
+                });
+
+                view.graphics.removeAll();
+
+            }
+
+            function AddFire() {
+                _fireGraphic = new Graphic({
+                    geometry: {
+                        type: "point",
+                        x: 6.112237,
+                        y: 52.441266,
+                        spatialReference: { wkid: 4326 }
+                    },
+                    symbol: {
+                        angle: 0,
+                        xoffset: 0,
+                        yoffset: 5.416666666666666,
+                        type: "picture-marker",
+                        url: "data:image/png;base64, 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",
+                        width: 30,
+                        height: 30
+                    },
+                })
+                view.graphics.add(_fireGraphic);
+            }
+            var closestFacilityUrl = "https://route.arcgis.com/arcgis/rest/services/World/ClosestFacility/NAServer/ClosestFacility_World/solveClosestFacility"
+            function CalculateClosest() {
+
+                var currentExt = view.extent;
+                currentExt = currentExt.expand(2);
+
+                var extentFacilities = new NetworkUrl({
+                    url:
+                        facilitiesUrl +
+                        "/query?where=1%3D1&returnGeometry=true&outFields=*&outSR=" + _fireGraphic.geometry.spatialReference.wkid + "&f=json&geometryType=esriGeometryEnvelope&geometry=" +
+                        currentExt.xmin +
+                        "," +
+                        currentExt.ymin +
+                        "," +
+                        currentExt.xmax +
+                        "," +
+                        currentExt.ymax +
+                        "&inSR=" +
+                        view.spatialReference.wkid
+                });
+
+                const closestFacilityParameters = new ClosestFacilityParameters({
+                    incidents: new FeatureSet({
+                        features: [_fireGraphic]
+                    }),
+                    facilities: extentFacilities,
+                    defaultTargetFacilityCount: 1
+                });
+
+
+
+                closestFacility.solve(closestFacilityUrl, closestFacilityParameters).then(result => {
+                    console.log(result);
+                    var closestFacilityResult = result.routes[0];
+                    closestFacilityResult.symbol = {
+                        type: "simple-line",
+                        color: "red",
+                        width: "4px",
+                        style: "short-dot"
+                    };
+
+                    view.graphics.removeAll();
+                    view.graphics.add(_fireGraphic);
+                    view.graphics.add(closestFacilityResult);
+
+                })
+
+
+            }
+
+            function AddContext() 
+            {
+
+                view.map.basemap.baseLayers.forEach(function (layer) {
+                    layer.visible = true;
+                });
+            }
+
+        });
+    </script>
+</head>
+
+</html>
+
+<body>
+
+    <!-- shell will provide main app layout -->
+    <calcite-shell content-behind>
+        <!-- custom header for the shell -->
+        <div slot="header" id="header">
+            <h2 id="header-title">Context</h2>
+        </div>
+
+        <div id="mapDiv" class="mapdiv"></div>
+
+        <calcite-panel height-scale="l" width-scale="m" data-panel-id="info" id="info-panel" heading="">
+            <div id="info-container" class="info-container" style="padding: 1rem;">
+                <div id="button-container">
+                    <calcite-button id="add-fire-button" scale="l" width="half">Add Fire</calcite-button>
+                    <calcite-button id="calculate-closest-button" scale="l" width="half">Calculate</calcite-button>
+                    <calcite-button id="context-button" scale="l" width="half">Context</calcite-button>
+                    <calcite-button color="neutral" id="reset-button" scale="l" width="half">Reset</calcite-button>
+                </div>
+            </div>
+        </calcite-panel>
+
+
+        <!-- custom footer for the shell -->
+        <div slot="footer" id="footer">
+            <div class="esri-logo"></div>
+        </div>
+    </calcite-shell>
+
+</body>
+<script src="https://esrinederland.github.io/CoolMonitor/CoolMonitor.js"></script>
+
+</html>
