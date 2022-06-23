@@ -1,6 +1,7 @@
 
 ![Banner](images/tweakers_banner.png)
-# TweakersDevSummit2022
+# Tweakers Developer Summit 2022
+Demo's, links and presentation as shown on the Tweakers Developer Summit 2022
 
 ## Links
 https://developers.arcgis.com
@@ -35,4 +36,4 @@ https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legen
 
 ---
 
-Demo's, links and presentation as shown on the Tweakers Developer Summit 2022
+## Presentation
