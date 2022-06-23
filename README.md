@@ -34,6 +34,8 @@ https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-CSVLay
 
 https://developers.arcgis.com/javascript/latest/api-reference/esri-widgets-Legend.html
 
+https://developers.arcgis.com/javascript/latest/api-reference/esri-layers-FeatureLayer.html
+
 ---
 
 ## Presentation
